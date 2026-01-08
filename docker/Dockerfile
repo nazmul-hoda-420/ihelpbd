@@ -1,14 +1,22 @@
-FROM python:3.4
+FROM python:3.11-slim
 
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		postgresql-client \
-	&& rm -rf /var/lib/apt/lists/*
+# Set working directory
+WORKDIR /app
 
-WORKDIR /usr/src/app
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+# Copy requirements file from root
+COPY requirements.txt .
+
+# Upgrade pip, setuptools, wheel
+RUN python -m pip install --upgrade pip setuptools wheel
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the project
 COPY . .
 
+# Expose Django default port
 EXPOSE 8000
+
+# Run Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
